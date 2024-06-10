@@ -12,8 +12,8 @@ class AuthView extends StatelessWidget {
     this.title = 'NextChat',
 
     required this.child,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
