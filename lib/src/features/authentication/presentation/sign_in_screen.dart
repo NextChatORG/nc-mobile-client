@@ -34,6 +34,7 @@ class SignInScreenState extends State<SignInScreen> {
 
       if (responseData != null) {
         await authProvider.saveDataFromLogIn(responseData);
+        FocusManager.instance.primaryFocus?.unfocus();
         navigator.pushReplacement('/');
       }
     } on GeneralFormException catch (e) {

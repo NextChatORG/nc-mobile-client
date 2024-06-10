@@ -27,6 +27,7 @@ class AuthView extends StatelessWidget {
       body: Container(
         color: theme.colorScheme.primary,
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           physics: const BouncingScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -75,7 +76,7 @@ class AuthView extends StatelessWidget {
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular((keyboardOn && !showBackButton) ? 0 : 72),
                         ),
-                        color: theme.colorScheme.background,
+                        color: theme.colorScheme.surface,
                       ),
                       padding: EdgeInsets.only(
                         bottom: 48,

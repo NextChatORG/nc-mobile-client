@@ -11,11 +11,11 @@ class NextChatApp extends StatelessWidget {
       title: 'NextChat',
       theme: ThemeData(
         colorScheme: const ColorScheme.dark(
-          background: Color(0xFF2F3037),
           primary: Color(0xFF673AB7),
           onPrimary: Color(0xFFFFFFFF),
           secondary: Color(0xFF89B73A),
           shadow: Color(0xFF131316),
+          surface: Color(0xFF2F3037),
         ),
         fontFamily: 'Noto Sans',
         useMaterial3: true,

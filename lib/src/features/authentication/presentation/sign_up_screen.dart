@@ -39,6 +39,7 @@ class SignUpScreenState extends State<SignUpScreen> {
 
       if (responseData != null) {
         await authProvider.saveDataFromSignUp(responseData);
+        FocusManager.instance.primaryFocus?.unfocus();
         navigator.pushReplacement('/recoveryCodes');
       }
     } on GeneralFormException catch (e) {
