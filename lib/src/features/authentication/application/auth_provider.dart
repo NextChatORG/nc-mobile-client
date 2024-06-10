@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:nc_mobile_client/src/constants/application_settings.dart';
 import 'package:nc_mobile_client/src/utils/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:http/http.dart' as http;
 
 class AuthProvider {
   String _accessToken = '';
@@ -10,6 +15,60 @@ class AuthProvider {
   bool get isLogged => _accessToken.isNotEmpty && _refreshToken.isNotEmpty;
 
   List<String> get recoveryCodes => _recoveryCodes;
+
+  Future<void> refreshTokenIfNecessary() async {
+    if (_accessToken.isEmpty || _refreshToken.isEmpty) return;
+
+    final accessTokenData = JWT.decode(_accessToken).payload;
+    final refreshTokenData = JWT.decode(_refreshToken).payload;
+
+    final accessTokenExp = DateTime.fromMillisecondsSinceEpoch(accessTokenData['exp'] * 1000);
+    final accessTokenExpired = DateTime.now().isAfter(accessTokenExp);
+
+    final refreshTokenExp = DateTime.fromMillisecondsSinceEpoch(refreshTokenData['exp'] * 1000);
+    final refreshTokenExpired = DateTime.now().isAfter(refreshTokenExp);
+
+    if (accessTokenData['sub'] != refreshTokenData['sub'] || refreshTokenExpired) {
+      await logOut();
+      return;
+    }
+
+    if (!accessTokenExpired) return;
+
+    print('Refreshing access token...');
+
+    var url = Uri.parse("${ApplicationSettings.baseAPIUrl}/auth/refreshToken");
+
+    try {
+      var response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'refresh_token': _refreshToken}),
+      );
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        _accessToken = data['access_token'] as String;
+
+        final database = await DatabaseHelper.instance.database;
+
+        await database.insert(
+          DatabaseHelper.authInfoTable,
+          {
+            'key_name': 'access_token',
+            'value': _accessToken,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+
+        return;
+      }
+    } on Exception catch (e) {
+      print(e);
+    }
+
+    await logOut();
+  }
 
   Future<void> loadDataFromDB() async {
     final database = await DatabaseHelper.instance.database;
@@ -26,6 +85,8 @@ class AuthProvider {
           _refreshToken = value;
         }
       }
+
+      await refreshTokenIfNecessary();
     }
   }
 
@@ -58,7 +119,7 @@ class AuthProvider {
     await _saveToDB();
   }
 
-   Future<void> saveDataFromSignUp(Map<String, dynamic> data) async {
+  Future<void> saveDataFromSignUp(Map<String, dynamic> data) async {
     _accessToken = data['access_token'] as String;
     _refreshToken = data['refresh_token'] as String;
 
