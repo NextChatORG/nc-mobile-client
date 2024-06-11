@@ -27,7 +27,7 @@ class AuthView extends StatelessWidget {
       body: Container(
         color: theme.colorScheme.primary,
         child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          //keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           physics: const BouncingScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -43,7 +43,7 @@ class AuthView extends StatelessWidget {
                       left: showBackButton ? 24 : 0,
                       top: 48,
                     ),
-                    height: (keyboardOn && !showBackButton) ? 0 : (showBackButton ? 48*3 : 48*6.5),
+                    height: (keyboardOn && !showBackButton) ? 0 : (showBackButton ? 48*3 : 48*5),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: showBackButton ? MainAxisAlignment.start : MainAxisAlignment.center,
@@ -63,7 +63,7 @@ class AuthView extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: 'ADLaM Display',
-                            fontSize: showBackButton ? 36 : 48,
+                            fontSize: showBackButton ? 24 : 48,
                           ),
                         ),
                       ],
