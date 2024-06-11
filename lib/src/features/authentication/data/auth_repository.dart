@@ -65,4 +65,39 @@ class AuthRepository {
 
     return null;
   }
+
+  static Future<Map<String, dynamic>?> recoverAccount(String username, String recoveryCode, String? password, String? confirmPassword) async {
+    var url = Uri.parse("${ApplicationSettings.baseAPIUrl}/auth/recoverAccount");
+
+    try {
+      var response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': username,
+          'recovery_code': recoveryCode,
+          'password': password,
+          'confirm_password': confirmPassword,
+        }),
+      );
+
+      if (response.statusCode == 204) {
+        return {'recovery_codes': []};
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 400 || response.statusCode == 409) {
+        throw GeneralFormException(data['message']);
+      } else if (response.statusCode == 200) {
+        return data;
+      }
+    } on SocketException catch (e) {
+      if (e.message == 'Connection refused') {
+        throw const GeneralFormException('Cannot connect to the server');
+      }
+      print(e.message);
+    }
+
+    return null;
+  }
 }

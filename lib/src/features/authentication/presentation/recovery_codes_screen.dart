@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:nc_mobile_client/src/constants/application_settings.dart';
 import 'package:nc_mobile_client/src/features/authentication/application/auth_provider.dart';
-import 'package:nc_mobile_client/src/features/authentication/data/auth_repository.dart';
-import 'package:nc_mobile_client/src/features/authentication/domain/auth_exceptions.dart';
 import 'package:nc_mobile_client/src/features/authentication/presentation/auth_view.dart';
 import 'package:provider/provider.dart';
 
@@ -15,11 +13,35 @@ class RecoveryCodesScreen extends StatefulWidget {
 }
 
 class RecoveryCodesScreenState extends State<RecoveryCodesScreen> {
+  Future<void> onCopy(AuthProvider authProvider) async {
+    await Clipboard.setData(ClipboardData(text: authProvider.recoveryCodes.join("      ")));
+  }
+
+  void onNext(AuthProvider authProvider, GoRouter navigator, ScaffoldMessengerState messenger) {
+    if (!authProvider.isLogged) {
+      messenger.showSnackBar(const SnackBar(
+        backgroundColor: Colors.green,
+        content: Text(
+          'Please log in using your new password!',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ));
+    }
+
+    navigator.pushReplacement('/');
+  }
+
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+    var navigator = GoRouter.of(context);
     var mediaQuery = MediaQuery.of(context);
-    var authProvider = Provider.of<AuthProvider>(context);
+    var messenger = ScaffoldMessenger.of(context);
+    var authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     return AuthView(
       child: Column(
@@ -58,13 +80,26 @@ class RecoveryCodesScreenState extends State<RecoveryCodesScreen> {
                 textAlign: TextAlign.center,
               ),
             ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 36),
-                child: FilledButton(
-                  onPressed: () => context.pushReplacement('/'),
+          Container(
+            margin: const EdgeInsets.only(top: 36),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () async => await onCopy(authProvider),
+                  style: TextButton.styleFrom(foregroundColor: theme.colorScheme.secondary),
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        child: const Icon(Icons.content_copy),
+                      ),
+                      const Text('Copy codes'),
+                    ],
+                  ),
+                ),
+                FilledButton(
+                  onPressed: () => onNext(authProvider, navigator, messenger),
                   child: const Row(
                     children: [
                       Text('Next'),
@@ -72,8 +107,8 @@ class RecoveryCodesScreenState extends State<RecoveryCodesScreen> {
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

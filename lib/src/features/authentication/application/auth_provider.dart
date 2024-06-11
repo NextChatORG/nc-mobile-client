@@ -35,8 +35,6 @@ class AuthProvider {
 
     if (!accessTokenExpired) return;
 
-    print('Refreshing access token...');
-
     var url = Uri.parse("${ApplicationSettings.baseAPIUrl}/auth/refreshToken");
 
     try {
@@ -126,6 +124,10 @@ class AuthProvider {
     _recoveryCodes = (data['recovery_codes'] as List).map((e) => e as String).toList();
 
     await _saveToDB();
+  }
+
+  void saveDataFromRecoverAccount(List<String> recoveryCodes) {
+    _recoveryCodes = recoveryCodes;
   }
 
   Future<void> logOut() async {
